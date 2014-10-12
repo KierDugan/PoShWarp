@@ -151,8 +151,7 @@ function Get-WarpLocations {
 
 function Get-WarpLocationNames {
     [CmdletBinding()]
-    param(
-    )
+    param()
 
     process {
 
@@ -161,8 +160,7 @@ function Get-WarpLocationNames {
 
 function Repair-WarpLocations {
     [CmdletBinding()]
-    param(
-    )
+    param()
 
     process {
 
