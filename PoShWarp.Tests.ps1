@@ -111,9 +111,25 @@ Describe "Set-LocationFromWarp" {
         }
     }
 
+    Context "when WarpName points to valid directory and PassThru is enabled" {
+        $mapName  = "projb"
+        $expected = GetFullPathForMapping $mapName
+
+        $actual = Set-LocationFromWarp -WarpName $mapName -PassThru `
+            -ErrorVariable result -ErrorAction SilentlyContinue
+
+        It "should change current location correctly" {
+            $actual | Should Be $expected
+        }
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+    }
+
     # Return to original directory
     Pop-Location
 }
+
 
 ## Enviroment teardown ---------------------------------------------------------
 WriteStatusMsg "`nTeardown:"
