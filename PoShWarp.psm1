@@ -28,8 +28,8 @@ function OpenWarpMap() {
         $decl = $xml.CreateXmlDeclaration("1.0", $null, $null)
         $root = $xml.CreateElement("WarpMap")
 
-        $xml.AppendChild($decl)
-        $xml.AppendChild($root)
+        $xml.InsertBefore($decl, $xml.DocumentElement)
+        $xml.InsertBefore($root, $xml.DocumentElement)
     }
 
     return $xml
