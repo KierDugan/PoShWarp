@@ -96,6 +96,14 @@ function Set-LocationFromWarp {
 function Add-WarpLocation {
     [CmdletBinding()]
     param(
+        [Parameter(Mandatory=$true, ValueFromPipeline=$false)]
+        [String]
+        $WarpName,
+
+        [Parameter(Mandatory=$false, ValueFromPipeline=$false)]
+        [ValidateScript({ Test-Path -Path $_ -PathType Container })]
+        [String]
+        $Path = '.'
     )
 
     begin {
@@ -105,7 +113,9 @@ function Add-WarpLocation {
     }
 
     process {
-
+        # Attempt to find any existing locations first
+        # If they exist, add this new one first to override it
+        # If not, just append the element to the end of the list
     }
 
     end {
@@ -127,11 +137,20 @@ function Remove-WarpLocation {
 
 function Get-WarpLocations {
     [CmdletBinding()]
-    param(
-    )
+    param()
 
     process {
+        # Actually check the warp-map even exists first
+        if (-not (WarpMapExists)) {
+            Write-Output "No warp locations defined."
+        } else {
+            # Open the warp-map
+            Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
+            $xml = OpenWarpMap
 
+            # Return all the locations in the map
+            return ConvertElementsToHash $xml.WarpMap.Location
+        }
     }
 }
 
