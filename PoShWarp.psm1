@@ -68,13 +68,11 @@ function Set-LocationFromWarp {
           $PassThru = $false
     )
 
-    begin {
+    process {
         # Open the XML warp-map
         Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
         $xml = OpenWarpMap
-    }
-
-    process {
+        
         # Find all warp entries with the given name
         $entry = FindWarpLocations $xml $WarpName | Select-Object -First 1
         if (-not $entry) {
@@ -93,12 +91,6 @@ function Set-LocationFromWarp {
         # Attempt to go to the warp location
         return Set-Location -Path $path -PassThru:$PassThru
     }
-
-    end {
-        # Save the changes to the warp-map
-        Write-Verbose "Saving warp-map file: $(GetWarpMapFilename)"
-        CloseWarpMap $xml
-    }
 }
 
 function Add-WarpLocation {
@@ -106,8 +98,20 @@ function Add-WarpLocation {
     param(
     )
 
+    begin {
+        # Open the XML warp-map
+        Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
+        $xml = OpenWarpMap
+    }
+
     process {
 
+    }
+
+    end {
+        # Save the changes to the warp-map
+        Write-Verbose "Saving warp-map file: $(GetWarpMapFilename)"
+        CloseWarpMap $xml
     }
 }
 
