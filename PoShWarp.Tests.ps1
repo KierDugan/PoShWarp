@@ -11,6 +11,7 @@ Import-Module .\PoShWarp.psm1 -Force
 ## Enviroment setup ------------------------------------------------------------
 $TestRoot      = "Testing"
 $TestWarpMap   = "WarpMap.xml"
+$TestWarpMapMT = "EmptyWarpMap.xml"
 $TestStructure = @(
     @{ "Name"="proja"; "Path"="Projects/ProjectA"; "Exists"=$true  },
     @{ "Name"="projb"; "Path"="Projects/ProjectB"; "Exists"=$true  },
@@ -38,6 +39,12 @@ function RestoreWarpMap {
         Rename-Item "$env:POSHWARP_MAPFILE.hidden" $env:POSHWARP_MAPFILE
     }
 }
+function UseEmptyWarpMap {
+    $env:POSHWARP_MAPFILE = Join-Path $TestRootDir $TestWarpMapMT
+}
+function UseNormalWarpMap {
+    $env:POSHWARP_MAPFILE = Join-Path $TestRootDir $TestWarpMap
+}
 
 # Actual environment set-up
 WriteStatusMsg "Creating directory structure for tests"
@@ -61,6 +68,11 @@ function CreateWarpMap {
     # Add the root node
     $rootNode = $xml.CreateElement("WarpMap")
     $xml.InsertBefore($rootNode, $xml.DocumentElement) | Out-Null
+
+    # Save an empty warp-map
+    $xmlFilename = Join-Path $TestRootDir $TestWarpMapMT
+    WriteStatusMsg "  saving empty warp-map as $xmlFilename"
+    $xml.Save($xmlFilename)
 
     # Add all the mappings specified above
     $TestStructure | foreach {
@@ -120,6 +132,24 @@ Describe "Set-LocationFromWarp" {
         }
     }
 
+    Context "when warp-map exists but is empty" {
+        $prelocation = (Get-Location).Path
+
+        UseEmptyWarpMap
+        Set-LocationFromWarp -WarpName "proja" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+        UseNormalWarpMap
+
+        $postlocation = (Get-Location).Path
+
+        It "should fail with error message" {
+            $result | Should Not BeNullOrEmpty
+        }
+        It "should not have changed directory" {
+            $prelocation | Should Be $postlocation
+        }
+    }
+
     Context "when WarpName points to valid directory" {
         $mapName  = "proja"
         $expected = GetFullPathForMapping $mapName
@@ -152,6 +182,54 @@ Describe "Set-LocationFromWarp" {
 
     # Return to original directory
     Pop-Location
+}
+
+Describe "Get-WarpLocations" {
+    Context "when warp-map is correctly populated" {
+        $locations = Get-WarpLocations -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should match the test warp-map exactly" {
+            for ($i = 0; $i -lt $locations.Length; $i++) {
+                $name, $path = $locations.Keys[$i], $locations.Values[$i]
+                $mapEntry    = $TestStructure[$i]
+
+                $name | Should BeExactly $mapEntry.Name
+                $path | Should BeExactly (Join-Path $TestRootDir $mapEntry.Path)
+            }
+        }
+    }
+
+    Context "when warp-map does not exist" {
+        HideWarpMap
+        $locations = Get-WarpLocations -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+        RestoreWarpMap
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should return an empty map" {
+            $locations | Should BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map exists but is empty" {
+        UseEmptyWarpMap
+        $locations = Get-WarpLocations -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+        UseNormalWarpMap
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should return an empty map" {
+            $locations | Should BeNullOrEmpty
+        }
+    }
 }
 
 

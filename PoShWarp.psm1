@@ -45,7 +45,9 @@ function FindWarpLocations($xml, $name) {
 }
 
 function ConvertElementsToHash($elems) {
-    return $elems | foreach { @{ $_.Name = $_.Path } }
+    if ($elems) {
+        return $elems | foreach { @{ $_.Name = $_.Path } }
+    }
 }
 
 
