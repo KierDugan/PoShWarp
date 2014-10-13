@@ -14,7 +14,8 @@ $TestWarpMap   = "WarpMap.xml"
 $TestStructure = @(
     @{ "Name"="proja"; "Path"="Projects/ProjectA"; "Exists"=$true  },
     @{ "Name"="projb"; "Path"="Projects/ProjectB"; "Exists"=$true  },
-    @{ "Name"="projc"; "Path"="Projects/ProjectC"; "Exists"=$false }
+    @{ "Name"="projc"; "Path"="Projects/ProjectC"; "Exists"=$false },
+    @{ "Name"="projd"; "Path"="Projects/ProjectB"; "Exists"=$false }
 )
 $TestRootDir = Join-Path (Get-Location) $TestRoot
 $TestOldMap  = $env:POSHWARP_MAPFILE
