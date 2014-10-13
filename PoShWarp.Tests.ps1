@@ -232,6 +232,73 @@ Describe "Get-WarpLocations" {
     }
 }
 
+Describe "Get-WarpLocationNames" {
+    Context "when warp-map is correct and current directory has mappings" {
+        Push-Location .
+        Set-LocationFromWarp projb
+
+        $curLocation = (Get-Location).Path
+        $entries = Get-WarpLocationNames -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        Pop-Location
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should have returned a list of entries" {
+            foreach ($name in $entries.Keys) {
+                $entries.$name | Should Be $curLocation
+            }
+        }
+    }
+
+    Context "when warp-map is correct and current directory has no mappings" {
+        Push-Location .
+        Set-Location $TestRootDir
+
+        $entries = Get-WarpLocationNames -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        Pop-Location
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should list no entries" {
+            $entries | Should BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map exists but is empty" {
+        UseEmptyWarpMap
+        $entries = Get-WarpLocationNames -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+        UseNormalWarpMap
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should list no entries" {
+            $entries | Should BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map is missing" {
+        HideWarpMap
+        $entries = Get-WarpLocationNames -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+        RestoreWarpMap
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should list no entries" {
+            $entries | Should BeNullOrEmpty
+        }
+    }
+}
+
 
 ## Enviroment teardown ---------------------------------------------------------
 WriteStatusMsg "`nTeardown:"
