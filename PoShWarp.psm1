@@ -137,7 +137,7 @@ function Get-WarpLocations {
     process {
         # Actually check the warp-map even exists first
         if (-not (WarpMapExists)) {
-            Write-Output "No warp locations defined."
+            Write-Warning "No warp locations defined."
         } else {
             # Open the warp-map
             Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
@@ -154,7 +154,19 @@ function Get-WarpLocationNames {
     param()
 
     process {
+        # Actually check the warp-map even exists first
+        if (-not (WarpMapExists)) {
+            Write-Warning "No warp locations defined."
+        } else {
+            # Open the warp-map
+            Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
+            $xml = OpenWarpMap
 
+            # Find all the warp names that point to the current location
+            $curdir  = (Get-Location).Path
+            $entries = $xml.WarpMap.Location | where { $_.Path -eq $curdir }
+            return ConvertElementsToHash $entries
+        }
     }
 }
 
