@@ -20,6 +20,7 @@ $TestStructure = @(
 $TestRootDir = Join-Path (Get-Location) $TestRoot
 $TestOldMap  = $env:POSHWARP_MAPFILE
 
+# Helper functions
 function GetFullPathForMapping($warpName) {
     $entry = $TestStructure | where { $_.Name -eq $warpName }
     return (Join-Path $TestRootDir $entry.Path)
@@ -27,7 +28,18 @@ function GetFullPathForMapping($warpName) {
 function WriteStatusMsg($msg) {
     Write-Host -ForegroundColor DarkGray $msg
 }
+function HideWarpMap {
+    if (Test-Path $env:POSHWARP_MAPFILE -Type Leaf) {
+        Rename-Item $env:POSHWARP_MAPFILE "$env:POSHWARP_MAPFILE.hidden"
+    }
+}
+function RestoreWarpMap {
+    if (Test-Path "$env:POSHWARP_MAPFILE.hidden" -Type Leaf) {
+        Rename-Item "$env:POSHWARP_MAPFILE.hidden" $env:POSHWARP_MAPFILE
+    }
+}
 
+# Actual environment set-up
 WriteStatusMsg "Creating directory structure for tests"
 $TestStructure | where { $_.Exists } | foreach {
     $path = Join-Path $TestRoot $_.Path
@@ -91,6 +103,17 @@ Describe "Set-LocationFromWarp" {
     Context "when WarpName points to non-existant directory" {
         Set-LocationFromWarp -WarpName "projc" -ErrorVariable result `
             -ErrorAction SilentlyContinue
+
+        It "should fail with error message" {
+            $result | Should Not BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map does not exist" {
+        HideWarpMap
+        Set-LocationFromWarp -WarpName "proja" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+        RestoreWarpMap
 
         It "should fail with error message" {
             $result | Should Not BeNullOrEmpty
