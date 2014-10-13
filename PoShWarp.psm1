@@ -138,9 +138,7 @@ function Get-WarpLocations {
 
     process {
         # Actually check the warp-map even exists first
-        if (-not (WarpMapExists)) {
-            Write-Warning "No warp locations defined."
-        } else {
+        if (WarpMapExists) {
             # Open the warp-map
             Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
             $xml = OpenWarpMap
@@ -157,9 +155,7 @@ function Get-WarpLocationNames {
 
     process {
         # Actually check the warp-map even exists first
-        if (-not (WarpMapExists)) {
-            Write-Warning "No warp locations defined."
-        } else {
+        if (WarpMapExists) {
             # Open the warp-map
             Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
             $xml = OpenWarpMap
