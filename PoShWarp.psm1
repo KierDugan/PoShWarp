@@ -151,12 +151,58 @@ function Add-WarpLocation {
 }
 
 function Remove-WarpLocation {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Low")]
     param(
+          [Parameter(Mandatory=$false, ValueFromPipeline=$true)]
+          [String]
+          $WarpName
     )
 
-    process {
+    begin {
+        # Open the XML warp-map
+        Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
+        $xml = OpenWarpMap
+        $warpMapElem = $xml.SelectSingleNode("WarpMap")
+    }
 
+    process {
+        # Find all elements to delete
+        if ($WarpName) {
+            $elemsToRemove = $warpMapElem.Location |
+                where { $_.Name -eq $WarpName}
+        } else {
+            $curPath = (Get-Location).Path
+            $elemsToRemove = $warpMapElem.Location |
+                where { $_.Path -eq $curPath}
+        }
+
+        # Bail if there's no work to do
+        if (-not $elemsToRemove) {
+            if ($WarpName) {
+                Write-Error "$WarpName does not exist in warp-map."
+            } else {
+                Write-Error "There is no entry for this directory in warp-map."
+            }
+            
+            return
+        }
+
+        # Get confirmation from user
+        if ($elemsToRemove.Length) {
+            $prompt = "Remove $($elemsToRemove.Count) entries from warp-map."
+        } else {
+            $prompt = "Remove 1 entry from warp-map."
+        }
+        if ($PSCmdlet.ShouldProcess($prompt)) {
+            # Remove the elements from the WarpMap tag
+            foreach ($elem in $elemsToRemove) {
+                $warpMapElem.RemoveChild($elem) | Out-Null
+            }
+            
+            # Save the changes to the warp-map
+            Write-Verbose "Saving warp-map file: $(GetWarpMapFilename)"
+            CloseWarpMap $xml
+        }
     }
 }
 
