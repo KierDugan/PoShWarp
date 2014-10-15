@@ -110,14 +110,14 @@ function Add-WarpLocation {
     }
 
     process {
-        # Expand the path
-        $Path = (Get-Item $Path).FullName
-
         # Target path *must* exist
         if (-not (Test-Path -Path $Path -PathType Container)) {
             Write-Error "Target path must exist."
             return
         }
+
+        # Expand the path
+        $Path = (Get-Item $Path).FullName
 
         # Find the first reference to the wapr name so that this can be added
         # before it, thereby overriding it.
