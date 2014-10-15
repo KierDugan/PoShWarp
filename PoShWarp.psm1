@@ -28,8 +28,8 @@ function OpenWarpMap() {
         $decl = $xml.CreateXmlDeclaration("1.0", $null, $null)
         $root = $xml.CreateElement("WarpMap")
 
-        $xml.InsertBefore($decl, $xml.DocumentElement)
-        $xml.InsertBefore($root, $xml.DocumentElement)
+        $xml.InsertBefore($decl, $xml.DocumentElement) | Out-Null
+        $xml.InsertBefore($root, $xml.DocumentElement) | Out-Null
     }
 
     return $xml
@@ -98,7 +98,6 @@ function Add-WarpLocation {
         $WarpName,
 
         [Parameter(Mandatory=$false, ValueFromPipeline=$false)]
-        [ValidateScript({ Test-Path -Path $_ -PathType Container })]
         [String]
         $Path = '.'
     )
@@ -107,12 +106,41 @@ function Add-WarpLocation {
         # Open the XML warp-map
         Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
         $xml = OpenWarpMap
+        $warpMapElem = $xml.SelectSingleNode("WarpMap")
     }
 
     process {
-        # Attempt to find any existing locations first
-        # If they exist, add this new one first to override it
-        # If not, just append the element to the end of the list
+        # Expand the path
+        $Path = (Get-Item $Path).FullName
+
+        # Target path *must* exist
+        if (-not (Test-Path -Path $Path -PathType Container)) {
+            Write-Error "Target path must exist."
+            return
+        }
+
+        # Find the first reference to the wapr name so that this can be added
+        # before it, thereby overriding it.
+        $exstingEntry = $xml.WarpMap.Location | 
+            where { $_.Name -eq $WarpName} | Select-Object -First 1
+
+        # Construct a new XML element to hold the mapping
+        $newElem = $xml.CreateElement("Location")
+        $newElem.SetAttribute("Name", $WarpName)
+        $newElem.SetAttribute("Path", $Path)
+
+        # If this warp name has not been used before, add the element to the end
+        # of the document
+        if (-not $exstingEntry) {
+            $dirElem = $warpMapElem.AppendChild($newElem)
+        } else {
+            # Prevent duplication
+            if (-not ($exstingEntry.Path -eq $Path)) {
+                $dirElem = $warpMapElem.InsertBefore($newElem, $exstingEntry)
+            }
+        }
+
+        return ConvertElementsToHash $dirElem
     }
 
     end {
