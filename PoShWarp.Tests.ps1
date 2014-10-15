@@ -13,11 +13,11 @@ $TestRoot      = "Testing"
 $TestWarpMap   = "WarpMap.xml"
 $TestWarpMapMT = "EmptyWarpMap.xml"
 $TestStructure = @(
-    @{ "Name"="proja"; "Path"="ProjectA"; "Exists"=$true,  "Entry"=$true  },
-    @{ "Name"="projb"; "Path"="ProjectB"; "Exists"=$true,  "Entry"=$true  },
-    @{ "Name"="projc"; "Path"="ProjectC"; "Exists"=$false, "Entry"=$true  },
-    @{ "Name"="projd"; "Path"="ProjectB"; "Exists"=$false, "Entry"=$true  }
-    @{ "Name"="proje"; "Path"="ProjectE"; "Exists"=$true,  "Entry"=$false }
+    @{ "Name"="proja"; "Path"="ProjectA"; "Exists"=$true;  "Entry"=$true  },
+    @{ "Name"="projb"; "Path"="ProjectB"; "Exists"=$true;  "Entry"=$true  },
+    @{ "Name"="projc"; "Path"="ProjectC"; "Exists"=$false; "Entry"=$true  },
+    @{ "Name"="projd"; "Path"="ProjectB"; "Exists"=$false; "Entry"=$true  }
+    @{ "Name"="proje"; "Path"="ProjectE"; "Exists"=$true;  "Entry"=$false }
 )
 $TestRootDir = Join-Path (Get-Location) $TestRoot
 $TestOldMap  = $env:POSHWARP_MAPFILE
@@ -39,6 +39,15 @@ function RestoreWarpMap {
     if (Test-Path "$env:POSHWARP_MAPFILE.hidden" -Type Leaf) {
         Rename-Item "$env:POSHWARP_MAPFILE.hidden" $env:POSHWARP_MAPFILE
     }
+}
+function RestoreWarpMapFromBackup {
+    $warpMapFilename = "$env:POSHWARP_MAPFILE"
+
+    if (Test-Path $warpMapFilename -Type Leaf) {
+        Remove-Item $warpMapFilename
+    }
+
+    Copy-Item "$warpMapFilename.backup" $warpMapFilename
 }
 function UseEmptyWarpMap {
     $env:POSHWARP_MAPFILE = Join-Path $TestRootDir $TestWarpMapMT
@@ -74,6 +83,7 @@ function CreateWarpMap {
     $xmlFilename = Join-Path $TestRootDir $TestWarpMapMT
     WriteStatusMsg "  saving empty warp-map as $xmlFilename"
     $xml.Save($xmlFilename)
+    $xml.Save("$xmlFilename.backup")
 
     # Add all the mappings specified above
     $TestStructure | where { $_.Entry } | foreach {
@@ -89,6 +99,7 @@ function CreateWarpMap {
     $xmlFilename = Join-Path $TestRootDir $TestWarpMap
     WriteStatusMsg "  saving warp-map as $xmlFilename"
     $xml.Save($xmlFilename)
+    $xml.Save("$xmlFilename.backup")
 
     # Set the environment variable to point at this new file
     $env:POSHWARP_MAPFILE = $xmlFilename
@@ -298,6 +309,145 @@ Describe "Get-WarpLocationNames" {
             $entries | Should BeNullOrEmpty
         }
     }
+}
+
+Describe "Add-WarpLocation" {
+    # Get the full path for the test directory
+    $testLocation    = GetFullPathForMapping "proje"
+    $initialLocation = (Get-Location).Path
+
+    Context "when warp-map exists and does not contain current directory" {
+        Push-Location .
+        Set-Location $testLocation
+
+        $location = Add-WarpLocation "proje" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        Pop-Location
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should return new location" {
+            $location.proje | Should Be $testLocation
+        }
+    }
+
+    Context "when warp-map exists and contains current directory" {
+        Push-Location .
+        Set-Location $testLocation
+
+        $location = Add-WarpLocation "proje" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        Pop-Location
+
+        RestoreWarpMapFromBackup
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should not return a new location" {
+            $location | Should BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map exists but is empty" {
+        UseEmptyWarpMap
+
+        $sizeBefore = (Get-Item $env:POSHWARP_MAPFILE).Length
+
+        Push-Location .
+        Set-Location $testLocation
+
+        $location = Add-WarpLocation "proje" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        Pop-Location
+
+        $sizeAfter = (Get-Item $env:POSHWARP_MAPFILE).Length
+
+        RestoreWarpMapFromBackup
+        UseNormalWarpMap
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should return new location" {
+            $location.proje | Should Be $testLocation
+        }
+        It "should have increase warp-map size" {
+            ($sizeBefore -lt $sizeAfter) | Should Be $true
+        }
+    }
+
+    Context "when warp-map does not exist" {
+        HideWarpMap
+
+        $existBefore = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
+
+        Push-Location .
+        Set-Location $testLocation
+
+        $location = Add-WarpLocation "proje" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        Pop-Location
+
+        $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
+        $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
+
+        if ($existAfter) {
+            Remove-Item $env:POSHWARP_MAPFILE
+        }
+
+        RestoreWarpMap
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should return new location" {
+            $location.proje | Should Be $testLocation
+        }
+        It "should have no warp-map before" {
+            $existBefore | Should Be $false
+        }
+        It "should have created a warp-map" {
+            $existAfter | Should Be $true
+        }
+    }
+
+#    Context "when warp-map exists and does not contain given path" {
+#
+#    }
+#
+#    Context "when warp-map exists and contains given path" {
+#
+#    }
+#
+#    Context "when warp-map exists but is empty and command given path arg" {
+#
+#    }
+#
+#    Context "when warp-map does not exist and command given path arg" {
+#
+#    }
+#
+#    Context "when warp-map exists; doesn't contain path; path doesn't exist" {
+#
+#    }
+#
+#    Context "when warp-map exists; contains path; path doesn't exist" {
+#
+#    }
+#
+#    Context "when warp-map exists; is empty; path doesn't exist" {
+#
+#    }
+#
+#    Context "when warp-map doesn't exist; path doesn't exist" {
+#
+#    }
 }
 
 
