@@ -13,10 +13,11 @@ $TestRoot      = "Testing"
 $TestWarpMap   = "WarpMap.xml"
 $TestWarpMapMT = "EmptyWarpMap.xml"
 $TestStructure = @(
-    @{ "Name"="proja"; "Path"="Projects/ProjectA"; "Exists"=$true  },
-    @{ "Name"="projb"; "Path"="Projects/ProjectB"; "Exists"=$true  },
-    @{ "Name"="projc"; "Path"="Projects/ProjectC"; "Exists"=$false },
-    @{ "Name"="projd"; "Path"="Projects/ProjectB"; "Exists"=$false }
+    @{ "Name"="proja"; "Path"="ProjectA"; "Exists"=$true,  "Entry"=$true  },
+    @{ "Name"="projb"; "Path"="ProjectB"; "Exists"=$true,  "Entry"=$true  },
+    @{ "Name"="projc"; "Path"="ProjectC"; "Exists"=$false, "Entry"=$true  },
+    @{ "Name"="projd"; "Path"="ProjectB"; "Exists"=$false, "Entry"=$true  }
+    @{ "Name"="proje"; "Path"="ProjectE"; "Exists"=$true,  "Entry"=$false }
 )
 $TestRootDir = Join-Path (Get-Location) $TestRoot
 $TestOldMap  = $env:POSHWARP_MAPFILE
@@ -75,7 +76,7 @@ function CreateWarpMap {
     $xml.Save($xmlFilename)
 
     # Add all the mappings specified above
-    $TestStructure | foreach {
+    $TestStructure | where { $_.Entry } | foreach {
         WriteStatusMsg "  adding mapping $($_.Name):$($_.Path)"
 
         $mapping = $xml.CreateElement("Location")
