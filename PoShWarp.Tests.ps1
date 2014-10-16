@@ -613,6 +613,154 @@ Describe "Add-WarpLocation" {
     }
 }
 
+Describe "Remove-WarpLocation" {
+    Context "when warp-map exists and named entry also exists" {
+        $testLocation = GetFullPathForMapping "projb"
+
+        $beforeLocation = Get-WarpLocations | where { $_.Name -eq "projb" }
+
+        Remove-WarpLocation -WarpName "projb" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        $afterLocation = Get-WarpLocations | where { $_.Name -eq "projb" }
+
+        RestoreWarpMapFromBackup
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should have a valid entry before removal" {
+            $beforeLocation.Name | Should Be "projb"
+            $beforeLocation.Path | Should Be $testLocation
+        }
+        It "should have removed the entry from the warp-map" {
+            $afterLocation | Should BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map exists and named entry does not" {
+        $beforeRemove = Get-WarpLocations
+
+        Remove-WarpLocation -WarpName "incorrect" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        $afterRemove = Get-WarpLocations
+
+        It "should produce an error" {
+            $result | Should Not BeNullOrEmpty
+        }
+        It "should not have affected the warp-map" {
+            $beforeRemove.Length | Should Not Be 0
+            $afterRemove.Length  | Should Not Be 0
+
+            $beforeRemove.Length | Should Be $afterRemove.Length
+
+            for ($i = 0; $i -lt $beforeRemove.Length; $i++) {
+                $beforeRemove[$i].Name | Should Be $afterRemove[$i].Name
+                $beforeRemove[$i].Path | Should Be $afterRemove[$i].Path
+            }
+        }
+    }
+
+    Context "when warp-map exists and directory entry also exists" {
+        $testLocation = GetFullPathForMapping "projb"
+
+        $beforeRemove = Get-WarpLocations | where { $_.Path -eq $testLocation }
+
+        Push-Location .
+        Set-LocationFromWarp "projb"
+
+        Remove-WarpLocation -ErrorVariable result -ErrorAction SilentlyContinue
+
+        Pop-Location
+
+        $afterRemove = Get-WarpLocations | where { $_.Path -eq $testLocation }
+
+        RestoreWarpMapFromBackup
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should have valid entries before removal" {
+            $beforeRemove | Should Not BeNullOrEmpty
+
+            foreach ($entry in $beforeRemove) {
+                $entry.Path | Should Be $testLocation
+            }
+        }
+        It "should have removed all entries from the warp-map" {
+            $afterRemove | Should BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map exists and directory entry does not" {
+        $beforeRemove = Get-WarpLocations
+
+        Remove-WarpLocation -ErrorVariable result -ErrorAction SilentlyContinue
+
+        $afterRemove = Get-WarpLocations
+
+        It "should produce an error" {
+            $result | Should Not BeNullOrEmpty
+        }
+        It "should not have affected the warp-map" {
+            $beforeRemove.Length | Should Not Be 0
+            $afterRemove.Length  | Should Not Be 0
+
+            $beforeRemove.Length | Should Be $afterRemove.Length
+
+            for ($i = 0; $i -lt $beforeRemove.Length; $i++) {
+                $beforeRemove[$i].Name | Should Be $afterRemove[$i].Name
+                $beforeRemove[$i].Path | Should Be $afterRemove[$i].Path
+            }
+        }
+    }
+
+    Context "when warp-map exists but is empty" {
+        UseEmptyWarpMap
+
+        $beforeRemove = Get-WarpLocations
+
+        Remove-WarpLocation "test" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        $afterRemove = Get-WarpLocations
+
+        UseNormalWarpMap
+
+        It "should produce an error" {
+            $result | Should Not BeNullOrEmpty
+        }
+        It "should not have affected warp-map" {
+            $beforeRemove | Should BeNullOrEmpty
+            $afterRemove | Should BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map does not exist" {
+        HideWarpMap
+
+        $existsBefore = Test-Path $env:POSHWARP_MAPFILE -PathType Leaf
+
+        Remove-WarpLocation "test" -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        $existsAfter = Test-Path $env:POSHWARP_MAPFILE -PathType Leaf
+
+        RestoreWarpMap
+
+        It "should produce an error" {
+            $result | Should Not BeNullOrEmpty
+        }
+        It "should not have a warp-map before command" {
+            $existsBefore | Should Be $false
+        }
+        It "should not have created a new warp-map" {
+            $existsAfter | Should Be $false
+        }
+    }
+}
+
 
 ## Enviroment teardown ---------------------------------------------------------
 WriteStatusMsg "`nTeardown:"
