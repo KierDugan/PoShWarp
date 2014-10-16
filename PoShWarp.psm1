@@ -44,9 +44,14 @@ function FindWarpLocations($xml, $name) {
     return $xml.WarpMap.Location | where { $_.Name -eq $name }
 }
 
-function ConvertElementsToHash($elems) {
+function ConvertElementsToObjects($elems) {
     if ($elems) {
-        return $elems | foreach { @{ $_.Name = $_.Path } }
+        return $elems | foreach {
+            $obj = New-Object System.Object
+            $obj | Add-Member -Type NoteProperty -Name "Name" -Value $_.Name
+            $obj | Add-Member -Type NoteProperty -Name "Path" -Value $_.Path
+            $obj
+        }
     }
 }
 
@@ -140,7 +145,7 @@ function Add-WarpLocation {
             }
         }
 
-        return ConvertElementsToHash $dirElem
+        return ConvertElementsToObjects $dirElem
     }
 
     end {
@@ -218,7 +223,7 @@ function Get-WarpLocations {
             $xml = OpenWarpMap
 
             # Return all the locations in the map
-            return ConvertElementsToHash $xml.WarpMap.Location
+            return ConvertElementsToObjects $xml.WarpMap.Location
         }
     }
 }
@@ -237,7 +242,7 @@ function Get-WarpLocationNames {
             # Find all the warp names that point to the current location
             $curdir  = (Get-Location).Path
             $entries = $xml.WarpMap.Location | where { $_.Path -eq $curdir }
-            return ConvertElementsToHash $entries
+            return ConvertElementsToObjects $entries
         }
     }
 }

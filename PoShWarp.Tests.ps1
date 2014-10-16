@@ -207,7 +207,7 @@ Describe "Get-WarpLocations" {
         }
         It "should match the test warp-map exactly" {
             for ($i = 0; $i -lt $locations.Length; $i++) {
-                $name, $path = $locations.Keys[$i], $locations.Values[$i]
+                $name, $path = $locations[$i].Name, $locations[$i].Path
                 $mapEntry    = $TestStructure[$i]
 
                 $name | Should BeExactly $mapEntry.Name
@@ -260,8 +260,8 @@ Describe "Get-WarpLocationNames" {
             $result | Should BeNullOrEmpty
         }
         It "should have returned a list of entries" {
-            foreach ($name in $entries.Keys) {
-                $entries.$name | Should Be $curLocation
+            foreach ($entry in $entries) {
+                $entry.Path | Should Be $curLocation
             }
         }
     }
@@ -327,16 +327,17 @@ Describe "Add-WarpLocation" {
 
         Pop-Location
 
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         It "should produce no error" {
             $result | Should BeNullOrEmpty
         }
         It "should return new location" {
-            $location.proje | Should Be $testLocation
+            $location.Name | Should Be "proje"
+            $location.Path | Should Be $testLocation
         }
         It "should create location pointing to the path" {
-            $entryAfter | Should Be $testLocation
+            $entryAfter.Path | Should Be $testLocation
         }
     }
 
@@ -373,7 +374,7 @@ Describe "Add-WarpLocation" {
         Pop-Location
 
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         RestoreWarpMapFromBackup
         UseNormalWarpMap
@@ -382,13 +383,14 @@ Describe "Add-WarpLocation" {
             $result | Should BeNullOrEmpty
         }
         It "should return new location" {
-            $location.proje | Should Be $testLocation
+            $location.Name | Should Be "proje"
+            $location.Path | Should Be $testLocation
         }
         It "should have increase warp-map size" {
             ($sizeBefore -lt $sizeAfter) | Should Be $true
         }
         It "should create location pointing to the path" {
-            $entryAfter | Should Be $testLocation
+            $entryAfter.Path | Should Be $testLocation
         }
     }
 
@@ -407,7 +409,7 @@ Describe "Add-WarpLocation" {
 
         $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         if ($existAfter) {
             Remove-Item $env:POSHWARP_MAPFILE
@@ -419,7 +421,8 @@ Describe "Add-WarpLocation" {
             $result | Should BeNullOrEmpty
         }
         It "should return new location" {
-            $location.proje | Should Be $testLocation
+            $location.Name | Should Be "proje"
+            $location.Path | Should Be $testLocation
         }
         It "should have no warp-map before" {
             $existBefore | Should Be $false
@@ -428,7 +431,7 @@ Describe "Add-WarpLocation" {
             $existAfter | Should Be $true
         }
         It "should create location pointing to the path" {
-            $entryAfter | Should Be $testLocation
+            $entryAfter.Path | Should Be $testLocation
         }
     }
 
@@ -436,16 +439,17 @@ Describe "Add-WarpLocation" {
         $location = Add-WarpLocation "proje" $testLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         It "should produce no error" {
             $result | Should BeNullOrEmpty
         }
         It "should return new location" {
-            $location.proje | Should Be $testLocation
+            $location.Name | Should Be "proje"
+            $location.Path | Should Be $testLocation
         }
         It "should create location pointing to the path" {
-            $entryAfter | Should Be $testLocation
+            $entryAfter.Path | Should Be $testLocation
         }
     }
 
@@ -472,7 +476,7 @@ Describe "Add-WarpLocation" {
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         RestoreWarpMapFromBackup
         UseNormalWarpMap
@@ -481,13 +485,14 @@ Describe "Add-WarpLocation" {
             $result | Should BeNullOrEmpty
         }
         It "should return new location" {
-            $location.proje | Should Be $testLocation
+            $location.Name | Should Be "proje"
+            $location.Path | Should Be $testLocation
         }
         It "should have increase warp-map size" {
             ($sizeBefore -lt $sizeAfter) | Should Be $true
         }
         It "should create location pointing to the path" {
-            $entryAfter | Should Be $testLocation
+            $entryAfter.Path | Should Be $testLocation
         }
     }
 
@@ -501,7 +506,7 @@ Describe "Add-WarpLocation" {
 
         $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         if ($existAfter) {
             Remove-Item $env:POSHWARP_MAPFILE
@@ -513,7 +518,8 @@ Describe "Add-WarpLocation" {
             $result | Should BeNullOrEmpty
         }
         It "should return new location" {
-            $location.proje | Should Be $testLocation
+            $location.Name | Should Be "proje"
+            $location.Path | Should Be $testLocation
         }
         It "should have no warp-map before" {
             $existBefore | Should Be $false
@@ -522,7 +528,7 @@ Describe "Add-WarpLocation" {
             $existAfter | Should Be $true
         }
         It "should create location pointing to the path" {
-            $entryAfter | Should Be $testLocation
+            $entryAfter.Path | Should Be $testLocation
         }
     }
 
@@ -530,13 +536,13 @@ Describe "Add-WarpLocation" {
         $location = Add-WarpLocation "proje" $fakeLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         It "should produce an error" {
             $result | Should Not BeNullOrEmpty
         }
         It "should not return new location" {
-            $location.proje | Should BeNullOrEmpty
+            $location | Should BeNullOrEmpty
         }
         It "should not create location pointing to the path" {
             $entryAfter | Should BeNullOrEmpty
@@ -552,7 +558,7 @@ Describe "Add-WarpLocation" {
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         RestoreWarpMapFromBackup
         UseNormalWarpMap
@@ -561,7 +567,7 @@ Describe "Add-WarpLocation" {
             $result | Should Not BeNullOrEmpty
         }
         It "should not return new location" {
-            $location.proje | Should BeNullOrEmpty
+            $location | Should BeNullOrEmpty
         }
         It "should not have increased warp-map size" {
             $sizeBefore | Should Be $sizeAfter
@@ -581,7 +587,7 @@ Describe "Add-WarpLocation" {
 
         $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = (Get-WarpLocations).proje
+        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
 
         if ($existAfter) {
             Remove-Item $env:POSHWARP_MAPFILE
@@ -593,7 +599,7 @@ Describe "Add-WarpLocation" {
             $result | Should Not BeNullOrEmpty
         }
         It "should not return new location" {
-            $location.proje | Should BeNullOrEmpty
+            $location | Should BeNullOrEmpty
         }
         It "should have no warp-map before" {
             $existBefore | Should Be $false
