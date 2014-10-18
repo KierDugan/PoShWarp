@@ -174,11 +174,11 @@ function Remove-WarpLocation {
         # Find all elements to delete
         if ($WarpName) {
             $elemsToRemove = $warpMapElem.Location |
-                where { $_.Name -eq $WarpName}
+                where { $_.Name -eq $WarpName }
         } else {
             $curPath = (Get-Location).Path
             $elemsToRemove = $warpMapElem.Location |
-                where { $_.Path -eq $curPath}
+                where { $_.Path -eq $curPath }
         }
 
         # Bail if there's no work to do
@@ -248,11 +248,45 @@ function Get-WarpLocationNames {
 }
 
 function Repair-WarpLocations {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Low")]
     param()
 
     process {
+        # Open the warp-map
+        Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
+        $xml = OpenWarpMap
+        $warpMapElem = $xml.SelectSingleNode("WarpMap")
 
+        # Find all entries that point to missing directories
+        if ($warpMapElem.Location) {
+            $danglers = $warpMapElem.Location | where {
+                -not (Test-Path -Path $_.Path -PathType Container)
+            }
+        }
+
+        # Bail early if there's nothing to remove
+        if (-not $danglers) {
+            Write-Verbose "No bad entries in warp-map."
+        } else {
+            # Build the message to confirm with user
+            if ($danglers.Length) {
+                $prompt = "Remove $($danglers.Count) entries from warp-map."
+            } else {
+                $prompt = "Remove 1 entry from warp-map."
+            }
+
+            # Actually do it...
+            if ($PSCmdlet.ShouldProcess($prompt)) {
+                # Remove the elements from the WarpMap tag
+                foreach ($dangler in $danglers) {
+                    $warpMapElem.RemoveChild($dangler) | Out-Null
+                }
+                
+                # Save the changes to the warp-map
+                Write-Verbose "Saving warp-map file: $(GetWarpMapFilename)"
+                CloseWarpMap $xml
+            }
+        }
     }
 }
 

@@ -17,7 +17,7 @@ $TestStructure  = @(
     @{ "Name"="proja"; "Path"="ProjectA"; "Exists"=$true;  "Entry"=$true  },
     @{ "Name"="projb"; "Path"="ProjectB"; "Exists"=$true;  "Entry"=$true  },
     @{ "Name"="projc"; "Path"="ProjectC"; "Exists"=$false; "Entry"=$true  },
-    @{ "Name"="projd"; "Path"="ProjectB"; "Exists"=$false; "Entry"=$true  }
+    @{ "Name"="projd"; "Path"="ProjectB"; "Exists"=$true;  "Entry"=$true  }
     @{ "Name"="proje"; "Path"="ProjectE"; "Exists"=$true;  "Entry"=$false }
 )
 $TestRootDir    = Join-Path (Get-Location) $TestRoot
@@ -756,6 +756,100 @@ Describe "Remove-WarpLocation" {
             $existsBefore | Should Be $false
         }
         It "should not have created a new warp-map" {
+            $existsAfter | Should Be $false
+        }
+    }
+}
+
+Describe "Repair-WarpLocations" {
+    Context "when warp-map exists and contains dangling entries" {
+        $beforeLocations = @(Get-WarpLocations)
+
+        Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
+
+        $afterLocations = @(Get-WarpLocations)
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should have dangling warp-map entries before invocation" {
+            $TestStructure | where { -not $_.Exists } | foreach {
+                $path    = Join-Path $TestRootDir $_.Path
+                $entries = $beforeLocations | where { $_.Path -eq $path }
+                $entries | Should Not BeNullOrEmpty
+            }
+        }
+        It "should not have dangling entires after invocation" {
+            $TestStructure | where { -not $_.Exists } | foreach {
+                $path    = Join-Path $TestRootDir $_.Path
+                $entries = $afterLocations | where { $_.Path -eq $path }
+                $entries | Should BeNullOrEmpty
+            }
+        }
+    }
+
+    Context "when warp-map exists and does not contain dangling entries" {
+        $beforeLocations = @(Get-WarpLocations)
+
+        Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
+
+        $afterLocations = @(Get-WarpLocations)
+
+        RestoreWarpMapFromBackup
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should not have changed the warp-map" {
+            $afterLocations.Length | Should Be $beforeLocations.Length
+
+            for ($i = 0; $i -lt $beforeLocations.Length; $i++) {
+                $beforeLocations.Name | Should Be $afterLocations.Name
+                $beforeLocations.Path | Should Be $afterLocations.Path
+            }
+        }
+    }
+
+    Context "when warp-map exists but is empty" {
+        UseEmptyWarpMap
+
+        $beforeLocations = @(Get-WarpLocations)
+
+        Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
+
+        $afterLocations = @(Get-WarpLocations)
+
+        UseNormalWarpMap
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should have empty warp-map before" {
+            $beforeLocations.Length | Should Be 0
+        }
+        It "should have empty warp-map after" {
+            $afterLocations.Length | Should Be 0
+        }
+    }
+
+    Context "when warp-map does not exist" {
+        HideWarpMap
+
+        $existsBefore = Test-Path -Path $env:POSHWARP_MAPFILE -PathType Leaf
+
+        Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
+
+        $existsAfter = Test-Path -Path $env:POSHWARP_MAPFILE -PathType Leaf
+
+        RestoreWarpMap
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should not have a warp-map before" {
+            $existsBefore | Should Be $false
+        }
+        It "should not have created an empty warp-map" {
             $existsAfter | Should Be $false
         }
     }
