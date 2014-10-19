@@ -211,7 +211,7 @@ function Remove-WarpLocation {
     }
 }
 
-function Get-WarpLocations {
+function Get-WarpLocation {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false)]
@@ -295,5 +295,5 @@ function Repair-WarpLocations {
 Export-ModuleMember Set-LocationFromWarp
 Export-ModuleMember New-WarpLocation
 Export-ModuleMember Remove-WarpLocation
-Export-ModuleMember Get-WarpLocations
+Export-ModuleMember Get-WarpLocation
 Export-ModuleMember Repair-WarpLocations

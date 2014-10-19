@@ -197,9 +197,9 @@ Describe "Set-LocationFromWarp" {
     Pop-Location
 }
 
-Describe "Get-WarpLocations" {
+Describe "Get-WarpLocation" {
     Context "when warp-map is correctly populated" {
-        $locations = Get-WarpLocations -ErrorVariable result `
+        $locations = Get-WarpLocation -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         It "should produce no error" {
@@ -218,7 +218,7 @@ Describe "Get-WarpLocations" {
 
     Context "when warp-map is correct and current directory has mappings" {
         $location = GetFullPathForMapping "projb"
-        $entries = Get-WarpLocations -Path $location -ErrorVariable result `
+        $entries = Get-WarpLocation -Path $location -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         It "should produce no error" {
@@ -232,7 +232,7 @@ Describe "Get-WarpLocations" {
     }
 
     Context "when warp-map is correct and current directory has no mappings" {
-        $entries = Get-WarpLocations -Path $TestRootDir -ErrorVariable result `
+        $entries = Get-WarpLocation -Path $TestRootDir -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         It "should produce no error" {
@@ -246,7 +246,7 @@ Describe "Get-WarpLocations" {
 
     Context "when warp-map does not exist" {
         HideWarpMap
-        $locations = Get-WarpLocations -ErrorVariable result `
+        $locations = Get-WarpLocation -ErrorVariable result `
             -ErrorAction SilentlyContinue
         RestoreWarpMap
 
@@ -260,7 +260,7 @@ Describe "Get-WarpLocations" {
 
     Context "when warp-map exists but is empty" {
         UseEmptyWarpMap
-        $locations = Get-WarpLocations -ErrorVariable result `
+        $locations = Get-WarpLocation -ErrorVariable result `
             -ErrorAction SilentlyContinue
         UseNormalWarpMap
 
@@ -288,7 +288,7 @@ Describe "New-WarpLocation" {
 
         Pop-Location
 
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         It "should produce no error" {
             $result | Should BeNullOrEmpty
@@ -335,7 +335,7 @@ Describe "New-WarpLocation" {
         Pop-Location
 
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         RestoreWarpMapFromBackup
         UseNormalWarpMap
@@ -370,7 +370,7 @@ Describe "New-WarpLocation" {
 
         $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         if ($existAfter) {
             Remove-Item $env:POSHWARP_MAPFILE
@@ -400,7 +400,7 @@ Describe "New-WarpLocation" {
         $location = New-WarpLocation "proje" $testLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         It "should produce no error" {
             $result | Should BeNullOrEmpty
@@ -437,7 +437,7 @@ Describe "New-WarpLocation" {
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         RestoreWarpMapFromBackup
         UseNormalWarpMap
@@ -467,7 +467,7 @@ Describe "New-WarpLocation" {
 
         $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         if ($existAfter) {
             Remove-Item $env:POSHWARP_MAPFILE
@@ -497,7 +497,7 @@ Describe "New-WarpLocation" {
         $location = New-WarpLocation "proje" $fakeLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         It "should produce an error" {
             $result | Should Not BeNullOrEmpty
@@ -519,7 +519,7 @@ Describe "New-WarpLocation" {
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         RestoreWarpMapFromBackup
         UseNormalWarpMap
@@ -548,7 +548,7 @@ Describe "New-WarpLocation" {
 
         $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
-        $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
+        $entryAfter = Get-WarpLocation | where { $_.Name -eq "proje" }
 
         if ($existAfter) {
             Remove-Item $env:POSHWARP_MAPFILE
@@ -578,12 +578,12 @@ Describe "Remove-WarpLocation" {
     Context "when warp-map exists and named entry also exists" {
         $testLocation = GetFullPathForMapping "projb"
 
-        $beforeLocation = Get-WarpLocations | where { $_.Name -eq "projb" }
+        $beforeLocation = Get-WarpLocation | where { $_.Name -eq "projb" }
 
         Remove-WarpLocation -WarpName "projb" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
-        $afterLocation = Get-WarpLocations | where { $_.Name -eq "projb" }
+        $afterLocation = Get-WarpLocation | where { $_.Name -eq "projb" }
 
         RestoreWarpMapFromBackup
 
@@ -600,12 +600,12 @@ Describe "Remove-WarpLocation" {
     }
 
     Context "when warp-map exists and named entry does not" {
-        $beforeRemove = Get-WarpLocations
+        $beforeRemove = Get-WarpLocation
 
         Remove-WarpLocation -WarpName "incorrect" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
-        $afterRemove = Get-WarpLocations
+        $afterRemove = Get-WarpLocation
 
         It "should produce an error" {
             $result | Should Not BeNullOrEmpty
@@ -626,7 +626,7 @@ Describe "Remove-WarpLocation" {
     Context "when warp-map exists and directory entry also exists" {
         $testLocation = GetFullPathForMapping "projb"
 
-        $beforeRemove = Get-WarpLocations | where { $_.Path -eq $testLocation }
+        $beforeRemove = Get-WarpLocation | where { $_.Path -eq $testLocation }
 
         Push-Location .
         Set-LocationFromWarp "projb"
@@ -635,7 +635,7 @@ Describe "Remove-WarpLocation" {
 
         Pop-Location
 
-        $afterRemove = Get-WarpLocations | where { $_.Path -eq $testLocation }
+        $afterRemove = Get-WarpLocation | where { $_.Path -eq $testLocation }
 
         RestoreWarpMapFromBackup
 
@@ -655,11 +655,11 @@ Describe "Remove-WarpLocation" {
     }
 
     Context "when warp-map exists and directory entry does not" {
-        $beforeRemove = Get-WarpLocations
+        $beforeRemove = Get-WarpLocation
 
         Remove-WarpLocation -ErrorVariable result -ErrorAction SilentlyContinue
 
-        $afterRemove = Get-WarpLocations
+        $afterRemove = Get-WarpLocation
 
         It "should produce an error" {
             $result | Should Not BeNullOrEmpty
@@ -680,12 +680,12 @@ Describe "Remove-WarpLocation" {
     Context "when warp-map exists but is empty" {
         UseEmptyWarpMap
 
-        $beforeRemove = Get-WarpLocations
+        $beforeRemove = Get-WarpLocation
 
         Remove-WarpLocation "test" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
-        $afterRemove = Get-WarpLocations
+        $afterRemove = Get-WarpLocation
 
         UseNormalWarpMap
 
@@ -724,11 +724,11 @@ Describe "Remove-WarpLocation" {
 
 Describe "Repair-WarpLocations" {
     Context "when warp-map exists and contains dangling entries" {
-        $beforeLocations = @(Get-WarpLocations)
+        $beforeLocations = @(Get-WarpLocation)
 
         Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
 
-        $afterLocations = @(Get-WarpLocations)
+        $afterLocations = @(Get-WarpLocation)
 
         It "should produce no error" {
             $result | Should BeNullOrEmpty
@@ -750,11 +750,11 @@ Describe "Repair-WarpLocations" {
     }
 
     Context "when warp-map exists and does not contain dangling entries" {
-        $beforeLocations = @(Get-WarpLocations)
+        $beforeLocations = @(Get-WarpLocation)
 
         Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
 
-        $afterLocations = @(Get-WarpLocations)
+        $afterLocations = @(Get-WarpLocation)
 
         RestoreWarpMapFromBackup
 
@@ -774,11 +774,11 @@ Describe "Repair-WarpLocations" {
     Context "when warp-map exists but is empty" {
         UseEmptyWarpMap
 
-        $beforeLocations = @(Get-WarpLocations)
+        $beforeLocations = @(Get-WarpLocation)
 
         Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
 
-        $afterLocations = @(Get-WarpLocations)
+        $afterLocations = @(Get-WarpLocation)
 
         UseNormalWarpMap
 
