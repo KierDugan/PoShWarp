@@ -213,7 +213,11 @@ function Remove-WarpLocation {
 
 function Get-WarpLocations {
     [CmdletBinding()]
-    param()
+    param(
+        [Parameter(Mandatory=$false)]
+        [String]
+        $Path
+    )
 
     process {
         # Actually check the warp-map even exists first
@@ -221,27 +225,23 @@ function Get-WarpLocations {
             # Open the warp-map
             Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
             $xml = OpenWarpMap
+
+            # Check if the entries are being filtered by the path
+            if ($Path) {
+                # Expand out to full path if, and only if, it exists
+                if (Test-Path -Path $Path -PathType Container) {
+                    $Path = (Get-Item $Path).FullName
+                    Write-Verbose "Path expanded to $Path."
+                }
+
+                # Filter the entries by path
+                $entries = $xml.WarpMap.Location | where { $_.Path -eq $Path }
+            } else {
+                # Just include everything
+                $entries = $xml.WarpMap.Location
+            }
 
             # Return all the locations in the map
-            return ConvertElementsToObjects $xml.WarpMap.Location
-        }
-    }
-}
-
-function Get-WarpLocationNames {
-    [CmdletBinding()]
-    param()
-
-    process {
-        # Actually check the warp-map even exists first
-        if (WarpMapExists) {
-            # Open the warp-map
-            Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
-            $xml = OpenWarpMap
-
-            # Find all the warp names that point to the current location
-            $curdir  = (Get-Location).Path
-            $entries = $xml.WarpMap.Location | where { $_.Path -eq $curdir }
             return ConvertElementsToObjects $entries
         }
     }
@@ -296,5 +296,4 @@ Export-ModuleMember Set-LocationFromWarp
 Export-ModuleMember New-WarpLocation
 Export-ModuleMember Remove-WarpLocation
 Export-ModuleMember Get-WarpLocations
-Export-ModuleMember Get-WarpLocationNames
 Export-ModuleMember Repair-WarpLocations
