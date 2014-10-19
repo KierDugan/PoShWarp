@@ -112,12 +112,12 @@ Write-Host ' '
 
 
 ## Unit tests ------------------------------------------------------------------
-Describe "Set-LocationFromWarp" {
+Describe "Select-WarpLocation" {
     # Store the current directory to return to it
     Push-Location .
 
     Context "when WarpName is not in the warp-map" {
-        Set-LocationFromWarp -WarpName "Invalid Name" -ErrorVariable result `
+        Select-WarpLocation -WarpName "Invalid Name" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         It "should fail with error message" {
@@ -126,7 +126,7 @@ Describe "Set-LocationFromWarp" {
     }
 
     Context "when WarpName points to non-existant directory" {
-        Set-LocationFromWarp -WarpName "projc" -ErrorVariable result `
+        Select-WarpLocation -WarpName "projc" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         It "should fail with error message" {
@@ -136,7 +136,7 @@ Describe "Set-LocationFromWarp" {
 
     Context "when warp-map does not exist" {
         HideWarpMap
-        Set-LocationFromWarp -WarpName "proja" -ErrorVariable result `
+        Select-WarpLocation -WarpName "proja" -ErrorVariable result `
             -ErrorAction SilentlyContinue
         RestoreWarpMap
 
@@ -149,7 +149,7 @@ Describe "Set-LocationFromWarp" {
         $prelocation = (Get-Location).Path
 
         UseEmptyWarpMap
-        Set-LocationFromWarp -WarpName "proja" -ErrorVariable result `
+        Select-WarpLocation -WarpName "proja" -ErrorVariable result `
             -ErrorAction SilentlyContinue
         UseNormalWarpMap
 
@@ -167,7 +167,7 @@ Describe "Set-LocationFromWarp" {
         $mapName  = "proja"
         $expected = GetFullPathForMapping $mapName
 
-        Set-LocationFromWarp -WarpName $mapName -ErrorVariable result
+        Select-WarpLocation -WarpName $mapName -ErrorVariable result
         $actual = Get-Location
 
         It "should change current location correctly" {
@@ -182,7 +182,7 @@ Describe "Set-LocationFromWarp" {
         $mapName  = "projb"
         $expected = GetFullPathForMapping $mapName
 
-        $actual = Set-LocationFromWarp -WarpName $mapName -PassThru `
+        $actual = Select-WarpLocation -WarpName $mapName -PassThru `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         It "should change current location correctly" {
@@ -673,7 +673,7 @@ Describe "Remove-WarpLocation" {
         $beforeRemove = Get-WarpLocation | where { $_.Path -eq $testLocation }
 
         Push-Location .
-        Set-LocationFromWarp "projb"
+        Select-WarpLocation "projb"
 
         Remove-WarpLocation -ErrorVariable result -ErrorAction SilentlyContinue
 

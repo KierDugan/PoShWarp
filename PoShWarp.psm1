@@ -58,7 +58,7 @@ function ConvertElementsToObjects($elems) {
 
 ## Commands --------------------------------------------------------------------
 
-function Set-LocationFromWarp {
+function Select-WarpLocation {
     [CmdletBinding()]
     param(
           [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -307,7 +307,7 @@ function Repair-WarpLocations {
 
 
 ## Modules Exports -------------------------------------------------------------
-Export-ModuleMember Set-LocationFromWarp
+Export-ModuleMember Select-WarpLocation
 Export-ModuleMember New-WarpLocation
 Export-ModuleMember Remove-WarpLocation
 Export-ModuleMember Get-WarpLocation
