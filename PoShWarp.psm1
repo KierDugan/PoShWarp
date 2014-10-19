@@ -216,6 +216,10 @@ function Get-WarpLocation {
     param(
         [Parameter(Mandatory=$false)]
         [String]
+        $WarpName,
+
+        [Parameter(Mandatory=$false)]
+        [String]
         $Path
     )
 
@@ -226,7 +230,14 @@ function Get-WarpLocation {
             Write-Verbose "Opening warp-map file: $(GetWarpMapFilename)"
             $xml = OpenWarpMap
 
-            # Check if the entries are being filtered by the path
+            # Build the warp name filter 
+            if ($WarpName) {
+                $nameFilter = { $_.Name -eq $WarpName }
+            } else {
+                $nameFilter = { $true }
+            }
+
+            # Build the path filter
             if ($Path) {
                 # Expand out to full path if, and only if, it exists
                 if (Test-Path -Path $Path -PathType Container) {
@@ -234,11 +245,15 @@ function Get-WarpLocation {
                     Write-Verbose "Path expanded to $Path."
                 }
 
-                # Filter the entries by path
-                $entries = $xml.WarpMap.Location | where { $_.Path -eq $Path }
+                # Make the actual filter block
+                $pathFilter = { $_.Path -eq $Path }
             } else {
-                # Just include everything
-                $entries = $xml.WarpMap.Location
+                $pathFilter = { $true }
+            }
+
+            # Apply the filters to the Location elements
+            $entries = $xml.WarpMap.Location | where {
+                (&$nameFilter) -and (&$pathFilter)
             }
 
             # Return all the locations in the map

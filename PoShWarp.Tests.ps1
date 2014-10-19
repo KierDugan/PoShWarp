@@ -243,6 +243,50 @@ Describe "Get-WarpLocation" {
         }
     }
 
+    Context "when warp-map is correct and entry name specified" {
+        $name = "projd"
+        $entries = Get-WarpLocation -WarpName $name -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should have returned a list of entries" {
+            foreach ($entry in $entries) {
+                $entry.Name | Should Be $name
+            }
+        }
+    }
+
+    Context "when warp-map is correct and entry name specified but is wrong" {
+        $name = "incorrect"
+        $entries = Get-WarpLocation -WarpName $name -ErrorVariable result `
+            -ErrorAction SilentlyContinue
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should not have returned a list of entries" {
+            $entries | Should BeNullOrEmpty
+        }
+    }
+
+    Context "when warp-map is correct and both name and path specified" {
+        $name = "projb"
+        $location = GetFullPathForMapping $name
+        $entries = Get-WarpLocation -WarpName $name -Path $location `
+            -ErrorVariable result -ErrorAction SilentlyContinue
+
+        It "should produce no error" {
+            $result | Should BeNullOrEmpty
+        }
+        It "should have retuned a list of entries" {
+            foreach ($entry in $entries) {
+                $entry.Name | Should Be $name
+                $entry.Path | Should Be $location
+            }
+        }
+    }
 
     Context "when warp-map does not exist" {
         HideWarpMap
