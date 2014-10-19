@@ -312,7 +312,7 @@ Describe "Get-WarpLocationNames" {
     }
 }
 
-Describe "Add-WarpLocation" {
+Describe "New-WarpLocation" {
     # Get the full path for the test directory
     $fakeLocation    = Join-Path $TestRootDir $TestFakeDir
     $testLocation    = GetFullPathForMapping "proje"
@@ -322,7 +322,7 @@ Describe "Add-WarpLocation" {
         Push-Location .
         Set-Location $testLocation
 
-        $location = Add-WarpLocation "proje" -ErrorVariable result `
+        $location = New-WarpLocation "proje" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         Pop-Location
@@ -345,7 +345,7 @@ Describe "Add-WarpLocation" {
         Push-Location .
         Set-Location $testLocation
 
-        $location = Add-WarpLocation "proje" -ErrorVariable result `
+        $location = New-WarpLocation "proje" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         Pop-Location
@@ -368,7 +368,7 @@ Describe "Add-WarpLocation" {
         Push-Location .
         Set-Location $testLocation
 
-        $location = Add-WarpLocation "proje" -ErrorVariable result `
+        $location = New-WarpLocation "proje" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         Pop-Location
@@ -402,7 +402,7 @@ Describe "Add-WarpLocation" {
         Push-Location .
         Set-Location $testLocation
 
-        $location = Add-WarpLocation "proje" -ErrorVariable result `
+        $location = New-WarpLocation "proje" -ErrorVariable result `
             -ErrorAction SilentlyContinue
 
         Pop-Location
@@ -436,7 +436,7 @@ Describe "Add-WarpLocation" {
     }
 
     Context "when warp-map exists and does not contain given path" {
-        $location = Add-WarpLocation "proje" $testLocation `
+        $location = New-WarpLocation "proje" $testLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
@@ -454,7 +454,7 @@ Describe "Add-WarpLocation" {
     }
 
     Context "when warp-map exists and contains given path" {
-        $location = Add-WarpLocation "proje" $testLocation `
+        $location = New-WarpLocation "proje" $testLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         RestoreWarpMapFromBackup
@@ -472,7 +472,7 @@ Describe "Add-WarpLocation" {
 
         $sizeBefore = (Get-Item $env:POSHWARP_MAPFILE).Length
 
-        $location = Add-WarpLocation "proje" $testLocation `
+        $location = New-WarpLocation "proje" $testLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
@@ -501,7 +501,7 @@ Describe "Add-WarpLocation" {
 
         $existBefore = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
 
-        $location = Add-WarpLocation "proje" $testLocation `
+        $location = New-WarpLocation "proje" $testLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
@@ -533,7 +533,7 @@ Describe "Add-WarpLocation" {
     }
 
     Context "when warp-map exists; doesn't contain path; path doesn't exist" {
-        $location = Add-WarpLocation "proje" $fakeLocation `
+        $location = New-WarpLocation "proje" $fakeLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $entryAfter = Get-WarpLocations | where { $_.Name -eq "proje" }
@@ -554,7 +554,7 @@ Describe "Add-WarpLocation" {
 
         $sizeBefore = (Get-Item $env:POSHWARP_MAPFILE).Length
 
-        $location = Add-WarpLocation "proje" $fakeLocation `
+        $location = New-WarpLocation "proje" $fakeLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $sizeAfter  = (Get-Item $env:POSHWARP_MAPFILE).Length
@@ -582,7 +582,7 @@ Describe "Add-WarpLocation" {
 
         $existBefore = Test-Path $env:POSHWARP_MAPFILE -Type Leaf
 
-        $location = Add-WarpLocation "proje" $fakeLocation `
+        $location = New-WarpLocation "proje" $fakeLocation `
             -ErrorVariable result -ErrorAction SilentlyContinue
 
         $existAfter = Test-Path $env:POSHWARP_MAPFILE -Type Leaf

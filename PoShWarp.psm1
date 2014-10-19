@@ -95,7 +95,7 @@ function Set-LocationFromWarp {
     }
 }
 
-function Add-WarpLocation {
+function New-WarpLocation {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true, ValueFromPipeline=$false)]
@@ -293,7 +293,7 @@ function Repair-WarpLocations {
 
 ## Modules Exports -------------------------------------------------------------
 Export-ModuleMember Set-LocationFromWarp
-Export-ModuleMember Add-WarpLocation
+Export-ModuleMember New-WarpLocation
 Export-ModuleMember Remove-WarpLocation
 Export-ModuleMember Get-WarpLocations
 Export-ModuleMember Get-WarpLocationNames
