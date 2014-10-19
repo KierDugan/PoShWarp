@@ -766,11 +766,11 @@ Describe "Remove-WarpLocation" {
     }
 }
 
-Describe "Repair-WarpLocations" {
+Describe "Repair-WarpMap" {
     Context "when warp-map exists and contains dangling entries" {
         $beforeLocations = @(Get-WarpLocation)
 
-        Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
+        Repair-WarpMap -ErrorVariable result -ErrorAction SilentlyContinue
 
         $afterLocations = @(Get-WarpLocation)
 
@@ -796,7 +796,7 @@ Describe "Repair-WarpLocations" {
     Context "when warp-map exists and does not contain dangling entries" {
         $beforeLocations = @(Get-WarpLocation)
 
-        Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
+        Repair-WarpMap -ErrorVariable result -ErrorAction SilentlyContinue
 
         $afterLocations = @(Get-WarpLocation)
 
@@ -820,7 +820,7 @@ Describe "Repair-WarpLocations" {
 
         $beforeLocations = @(Get-WarpLocation)
 
-        Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
+        Repair-WarpMap -ErrorVariable result -ErrorAction SilentlyContinue
 
         $afterLocations = @(Get-WarpLocation)
 
@@ -842,7 +842,7 @@ Describe "Repair-WarpLocations" {
 
         $existsBefore = Test-Path -Path $env:POSHWARP_MAPFILE -PathType Leaf
 
-        Repair-WarpLocations -ErrorVariable result -ErrorAction SilentlyContinue
+        Repair-WarpMap -ErrorVariable result -ErrorAction SilentlyContinue
 
         $existsAfter = Test-Path -Path $env:POSHWARP_MAPFILE -PathType Leaf
 

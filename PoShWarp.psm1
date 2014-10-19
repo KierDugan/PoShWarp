@@ -262,7 +262,7 @@ function Get-WarpLocation {
     }
 }
 
-function Repair-WarpLocations {
+function Repair-WarpMap {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Low")]
     param()
 
@@ -311,4 +311,4 @@ Export-ModuleMember Select-WarpLocation
 Export-ModuleMember New-WarpLocation
 Export-ModuleMember Remove-WarpLocation
 Export-ModuleMember Get-WarpLocation
-Export-ModuleMember Repair-WarpLocations
+Export-ModuleMember Repair-WarpMap
