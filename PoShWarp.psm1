@@ -55,6 +55,10 @@ function ConvertElementsToObjects($elems) {
     }
 }
 
+function SelectFirstNonNull() {
+    return $args | where { $_ } | Select-Object -First 1
+}
+
 
 ## Commands --------------------------------------------------------------------
 
@@ -305,6 +309,71 @@ function Repair-WarpMap {
     }
 }
 
+function wd {
+    [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Low")]
+    param(
+        [Parameter(Mandatory=$false)]
+        [String]
+        $WarpName,
+
+        [Parameter(Mandatory=$false)]
+        [String]
+        $Path,
+
+        [Parameter(Mandatory=$false)]
+        [Switch]
+        $PassThru,
+
+        [Parameter(Position=0, ValueFromRemainingArguments=$true)]
+        $argv
+    )
+
+    process {
+        # Make sure arguments have been specified
+        if ($argv.Length -eq 0) {
+            Write-Error "No sub-command or warp-name specified."
+            return
+        }
+
+        # Unpack the arguments
+        $warpName = SelectFirstNonNull $WarpName $argv[1]
+        $path = SelectFirstNonNull $Path $argv[2] '.'
+
+        # Redirect to appropriate command
+        switch -regex ($argv[0]) {
+            "add|new" {
+                return New-WarpLocation -WarpName $warpName -Path $path
+            }
+
+            "rm|del" {
+                return Remove-WarpLocation -WarpName $warpName
+            }
+
+            "ls|list" {
+                return Get-WarpLocation
+            }
+
+            "show" {
+                return Get-WarpLocation -WarpName $warpName
+            }
+
+            "clean|repair" {
+                return Repair-WarpMap
+            }
+
+            "help" {
+                return Get-Help wd
+            }
+
+            default {
+                $warpName = SelectFirstNonNull $WarpName $argv[0]
+                return Select-WarpLocation -WarpName $warpName `
+                    -PassThru:$PassThru
+            }
+        }
+    }
+}
+
 
 ## Modules Exports -------------------------------------------------------------
 Export-ModuleMember -Function Select-WarpLocation
@@ -312,3 +381,4 @@ Export-ModuleMember -Function New-WarpLocation
 Export-ModuleMember -Function Remove-WarpLocation
 Export-ModuleMember -Function Get-WarpLocation
 Export-ModuleMember -Function Repair-WarpMap
+Export-ModuleMember -Function wd
