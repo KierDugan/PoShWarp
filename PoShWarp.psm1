@@ -307,8 +307,8 @@ function Repair-WarpMap {
 
 
 ## Modules Exports -------------------------------------------------------------
-Export-ModuleMember Select-WarpLocation
-Export-ModuleMember New-WarpLocation
-Export-ModuleMember Remove-WarpLocation
-Export-ModuleMember Get-WarpLocation
-Export-ModuleMember Repair-WarpMap
+Export-ModuleMember -Function Select-WarpLocation
+Export-ModuleMember -Function New-WarpLocation
+Export-ModuleMember -Function Remove-WarpLocation
+Export-ModuleMember -Function Get-WarpLocation
+Export-ModuleMember -Function Repair-WarpMap
