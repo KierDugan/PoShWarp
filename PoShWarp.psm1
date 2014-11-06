@@ -9,7 +9,7 @@ function GetWarpMapFilename() {
     if (-not ($env:POSHWARP_MAPFILE -eq $null)) {
         return $env:POSHWARP_MAPFILE
     } else {
-        return "$(Get-ProfileDirectory)\WarpMap.xml"
+        return "$((Get-Item $profile).Directory.FullName)\WarpMap.xml"
     }
 }
 
