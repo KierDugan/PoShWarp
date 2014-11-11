@@ -62,6 +62,35 @@ function SelectFirstNonNull() {
 
 ## Commands --------------------------------------------------------------------
 
+<#
+.SYNOPSIS
+
+Searches the warp-map for the specified entry and sets the location accordingly.
+
+
+.DESCRIPTION
+
+Select-WarpLocation will search the active warp-map file for the entry with the
+given name and attempt to `Set-Location` to the corresponding path.  An error
+will be raised if no entry with the given name is found, of if the named entry
+exists but points to a non-existant directory.
+
+
+.PARAMETER WarpName
+
+Entry name to search for in the warp-map.
+
+
+.PARAMETER PassThru
+
+Return the new directory object after changing into it.
+
+
+.LINK
+
+https://github.com/DuFace/PoShWarp#warpmap
+https://github.com/DuFace/PoShWarp#Select-WarpLocation
+#>
 function Select-WarpLocation {
     [CmdletBinding()]
     param(
@@ -99,6 +128,34 @@ function Select-WarpLocation {
     }
 }
 
+<#
+.SYNOPSIS
+
+Creates a new entry in the current warp-map.
+
+
+.DESCRIPTION
+
+A new entry will be added to the warp-map curretly active using either the
+current or specific directry path.  If the does not exist, no entry will be
+created.  A warp-map XML file with be created if one does not already exist.
+
+
+.PARAMETER WarpName
+
+Name for the new warp-map entry.
+
+
+.PARAMETER Path
+
+Path to assign to WarpName.  Defaults to the current directory.
+
+
+.LINK
+
+https://github.com/DuFace/PoShWarp#warpmap
+https://github.com/DuFace/PoShWarp#New-WarpLocation
+#>
 function New-WarpLocation {
     [CmdletBinding()]
     param(
@@ -159,6 +216,29 @@ function New-WarpLocation {
     }
 }
 
+<#
+.SYNOPSIS
+
+Removes the specified entry from the active warp-map.
+
+
+.DESCRIPTION
+
+Searches the active warp-map for the named entry and then removes it.  The
+current directory will be used as a search term if no name is given.  All
+entries that meet the criterion will be removed.  An empty warp-map file will
+not be created if one does not already exist.
+
+
+.PARAMETER WarpName
+
+Warp-map entry name to search for.
+
+
+.LINK
+
+https://github.com/DuFace/PoShWarp#Remove-WarpLocation
+#>
 function Remove-WarpLocation {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Low")]
     param(
@@ -215,6 +295,34 @@ function Remove-WarpLocation {
     }
 }
 
+<#
+.SYNOPSIS
+
+Gets the entries from the warp-map, optionally filtering by name or path.
+
+
+.DESCRIPTION
+
+Get-WarpLocation will return all the entries from the warp-map that meet the
+given search criteria.  Zero or more entries will be returned.  Both a warp-name
+and a path may be specified, and both must match to return any results.  No
+error will be raised if the query results in no matches.
+
+
+.PARAMETER WarpName
+
+Name to search for in the warp-map.
+
+
+.PARAMETER Path
+
+Path to search for in the warp-map.
+
+
+.LINK
+
+https://github.com/DuFace/PoShWarp#Get-WarpLocation
+#>
 function Get-WarpLocation {
     [CmdletBinding()]
     param(
@@ -266,6 +374,25 @@ function Get-WarpLocation {
     }
 }
 
+<#
+.SYNOPSIS
+
+Removes all invalid directory references from the warp-map.
+
+
+.DESCRIPTION
+
+Over time, a living warp-map can retain entries pointing to directories that no
+longer exist.  Repair-WarpMap checks every entry in the warp-map and removes any
+that reference a directory that has been deleted.  Multiple entries pointing to
+the same directory will remain unchanged provided that they point to a directory
+that still exists.
+
+
+.LINK
+
+https://github.com/DuFace/PoShWarp#Repair-WarpMap
+#>
 function Repair-WarpMap {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Low")]
     param()
@@ -309,6 +436,56 @@ function Repair-WarpMap {
     }
 }
 
+<#
+.SYNOPSIS
+
+Provides all warp-map functionality under a single utilty command.
+
+
+.DESCRIPTION
+
+`wd` is a clone of the command offered in the eponymous zsh package.  It
+provides an interface to all of the other commands in PoShWarp:
+
+    wd add, wd new      -> New-WarpLocation
+    wd rm, wd del       -> Remove-WarpLocation
+    wd ls, wd list      -> Get-WarpLocation
+    wd clean, wd repair -> Repair-WarpMap
+    wd help             -> Get-Help wd
+
+`wd` also supports `wd show <WarpName>` which lists all entries that share the
+given name.  This has been provided as a convience as it simply maps onto 
+`Get-WarpLocation`, and also for compatibilty with the original `wd` command.
+
+`wd` treats the first argument as a warp-map entry name if it does not match one
+of the sub-commands.  In this instance `wd <WarpName>` maps onto
+`Select-WarpLocation -WarpName <WarpName>`.
+
+As `wd` exists for compatibility with the zsh package, it primarily relies on
+positional arguments as follows: `wd <sub-command> <WarpName> <Path>`.  However,
+named parameters are also supported to make good use of PowerShell.
+
+
+.PARAMETER WarpName
+
+Name for the warp-map entry.
+
+
+.PARAMETER Path
+
+Path for the warp-map entry.
+
+
+.PARAMETER PassThru
+
+Only used when selecting a warp location: flag propagates directory to 
+`Select-WarpLocation`.
+
+
+.LINK
+
+https://github.com/DuFace/PoShWarp#wd
+#>
 function wd {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact="Low")]
     param(
