@@ -1,0 +1,27 @@
+PoShWarp
+========
+
+PoShWarp is a PowerShell port of the [wd](https://github.com/mfaerevaag/wd)
+plugin for zsh.  It aims to offer the same convenience that `wd` offers in zsh
+alongside some more idiomatic PowerShell commands.
+
+* Give a simple usage example and motivation
+* Describe the warp-map file
+* Explain testing
+
+
+Commands
+========
+
+{% Select-WarpLocation %}
+{% New-WarpLocation %}
+{% Remove-WarpLocation %}
+{% Get-WarpLocation %}
+{% Repair-WarpMap %}
+{% wd %}
+
+
+Licence
+=======
+
+This tool is covered by the MIT licence.
