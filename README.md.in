@@ -11,7 +11,7 @@ Installation
 If you have [PsGet](http://psget.net/) installed, you can simply execute:
 
 ```PowerShell
-Install-Module PoShwarp
+Install-Module PoShWarp
 ```
 
 Otherwise, for a manual installation:
