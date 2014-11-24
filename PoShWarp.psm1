@@ -73,7 +73,7 @@ Searches the warp-map for the specified entry and sets the location accordingly.
 Select-WarpLocation will search the active warp-map file for the entry with the
 given name and attempt to `Set-Location` to the corresponding path.  An error
 will be raised if no entry with the given name is found, of if the named entry
-exists but points to a non-existant directory.
+exists but points to a non-existent directory.
 
 
 .PARAMETER WarpName
@@ -136,8 +136,8 @@ Creates a new entry in the current warp-map.
 
 .DESCRIPTION
 
-A new entry will be added to the warp-map curretly active using either the
-current or specific directry path.  If the does not exist, no entry will be
+A new entry will be added to the warp-map currently active using either the
+current or specific directory path.  If the does not exist, no entry will be
 created.  A warp-map XML file with be created if one does not already exist.
 
 
@@ -439,7 +439,7 @@ function Repair-WarpMap {
 <#
 .SYNOPSIS
 
-Provides all warp-map functionality under a single utilty command.
+Provides all warp-map functionality under a single utility command.
 
 
 .DESCRIPTION
@@ -454,8 +454,8 @@ provides an interface to all of the other commands in PoShWarp:
     wd help             -> Get-Help wd
 
 `wd` also supports `wd show <WarpName>` which lists all entries that share the
-given name.  This has been provided as a convience as it simply maps onto 
-`Get-WarpLocation`, and also for compatibilty with the original `wd` command.
+given name.  This has been provided as a convenience as it simply maps onto 
+`Get-WarpLocation`, and also for compatibility with the original `wd` command.
 
 `wd` treats the first argument as a warp-map entry name if it does not match one
 of the sub-commands.  In this instance `wd <WarpName>` maps onto
