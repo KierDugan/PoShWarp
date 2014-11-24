@@ -8,9 +8,6 @@ alongside some idiomatic PowerShell commands.
 Installation
 ------------
 
-**NOTE:** Automatic installation is not yet available as PoShWarp is awaiting
-approval for the PsGet module list.
-
 If you have [PsGet](http://psget.net/) installed, you can simply execute:
 
 ```PowerShell
