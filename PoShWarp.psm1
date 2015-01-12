@@ -552,6 +552,45 @@ function wd {
 }
 
 
+## Simple tab expansion for the wd utility function ----------------------------
+$script:wdSubCommands = @("add", "new", "rm", "del", "ls", "list", "show",
+                          "clean", "repair", "help")  # sub-commands of wd
+
+if (Test-Path Function:\TabExpansion) {
+    Rename-Item Function:\TabExpansion TabExpansionOld
+}
+
+function TabExpansion([string] $line, [string] $lastWord) {
+    if ($line -match "^wd\s+($($script:wdSubCommands -join '|'))\s+(.*)") {
+        $command = $Matches[1]
+        $param   = $Matches[2]
+
+        if ($command -match "rm|del|show") {
+            $options = Get-WarpLocation | foreach { $_.Name }
+            return $options | where { $_ -like "$param*" }
+        }
+    } elseif ($line -match "^wd\s+(.*)") {
+        $params  = $Matches[1]
+        $options = $script:wdSubCommands + `
+            (Get-WarpLocation | foreach { $_.Name })
+
+        if ($params -match "([a-zA-Z_]\w*)\s*(.*)") {
+            $subCommand = $Matches[1]
+            $options = $options | where { $_ -like "$subCommand*" }
+        }
+
+        return $options
+    } 
+
+    if (Test-Path Function:\TabExpansionOld) {
+        return TabExpansionOld $line $lastWord
+    }
+}
+
+
+## Advanced tab expansion for WarpName -----------------------------------------
+
+
 ## Modules Exports -------------------------------------------------------------
 Export-ModuleMember -Function Select-WarpLocation
 Export-ModuleMember -Function New-WarpLocation
@@ -559,3 +598,5 @@ Export-ModuleMember -Function Remove-WarpLocation
 Export-ModuleMember -Function Get-WarpLocation
 Export-ModuleMember -Function Repair-WarpMap
 Export-ModuleMember -Function wd
+
+Export-ModuleMember -Function TabExpansion
