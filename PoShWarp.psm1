@@ -566,13 +566,13 @@ function TabExpansion([string] $line, [string] $lastWord) {
         $param   = $Matches[2]
 
         if ($command -match "rm|del|show") {
-            $options = Get-WarpLocation | foreach { $_.Name }
+            $options = Get-WarpLocation | foreach { $_.Name } | Sort-Object
             return $options | where { $_ -like "$param*" }
         }
     } elseif ($line -match "^wd\s+(.*)") {
         $params  = $Matches[1]
-        $options = $script:wdSubCommands + `
-            (Get-WarpLocation | foreach { $_.Name })
+        $options = ($script:wdSubCommands | Sort-Object) + `
+            (Get-WarpLocation | foreach { $_.Name } | Sort-Object)
 
         if ($params -match "([a-zA-Z_]\w*)\s*(.*)") {
             $subCommand = $Matches[1]
@@ -641,7 +641,7 @@ $global:KJDCompleteOptions['CustomArgumentCompleters']['WarpName'] = {
             $options = $options | where { $_ -like "$wordToComplete*" }
         }
 
-        return $options
+        return $options | Sort-Object
     }
 }
 
