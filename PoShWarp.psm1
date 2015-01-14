@@ -589,6 +589,61 @@ function TabExpansion([string] $line, [string] $lastWord) {
 
 
 ## Advanced tab expansion for WarpName -----------------------------------------
+if (-not $global:KJDCompleteOptions) {
+    $global:KJDCompleteOptions = @{
+        CustomArgumentCompleters = @{};
+        NativeArgumentCompleters = @{}
+    }
+}
+
+# Hook into the global completion function
+$LookupCode = @'
+End
+{
+    # KJDCompletionLookup
+    if ($options -eq $null)
+    {
+        $options = $global:KJDCompleteOptions
+    }
+    else
+    {
+        $options += $global:KJDCompleteOptions
+    }
+
+'@
+
+if (-not ($function:TabExpansion2 -match 'KJDCompletionLookup')) {
+    $function:TabExpansion2 = $function:TabExpansion2 `
+        -replace 'End\r\n{', $LookupCode
+}
+
+# Register the actual completion function
+$global:KJDCompleteOptions['CustomArgumentCompleters']['WarpName'] = {
+    param(
+        $commandName,
+        $parameterName,
+        $wordToComplete,
+        $commandAst,
+        $fakeBoundParameter
+    )
+
+    # Correctly resolve the command name
+    if ((Get-Command $commandName).CommandType -eq 'Alias') {
+        $commandName = (Get-Command $commandName).ResolvedCommandName
+    }
+
+    # Make sure it's a PoShWarp command
+    if ($commandName -match "(Remove|Get|Select)-WarpLocation|wd") {
+        # Return a list of warp locations filtered appropriately
+        $options = Get-WarpLocation | foreach { $_.Name }
+
+        if ($wordToComplete) {
+            $options = $options | where { $_ -like "$wordToComplete*" }
+        }
+
+        return $options
+    }
+}
 
 
 ## Modules Exports -------------------------------------------------------------
