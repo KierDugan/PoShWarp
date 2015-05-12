@@ -26,7 +26,7 @@ Otherwise, for a manual installation:
 Motivation
 ----------
 
-Our systems contain projects strewn all over our systems.  We aim to keep things
+Our systems contain projects strewn all over the place.  We aim to keep things
 organised but something will always disrupt our careful organisation, and it
 becomes far to easy to forget where all these things end up living.  With
 PoShWarp, this problem becomes far more manageable because these commonly-used
