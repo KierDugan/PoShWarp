@@ -518,27 +518,27 @@ function wd {
 
         # Redirect to appropriate command
         switch -regex ($argv[0]) {
-            "add|new" {
+            "^(add|new)$" {
                 return New-WarpLocation -WarpName $warpName -Path $path
             }
 
-            "rm|del" {
+            "^(rm|del)$" {
                 return Remove-WarpLocation -WarpName $warpName
             }
 
-            "ls|list" {
+            "^(ls|list)$" {
                 return Get-WarpLocation
             }
 
-            "show" {
+            "^show$" {
                 return Get-WarpLocation -WarpName $warpName
             }
 
-            "clean|repair" {
+            "^(clean|repair)$" {
                 return Repair-WarpMap
             }
 
-            "help" {
+            "^help$" {
                 return Get-Help wd
             }
 
