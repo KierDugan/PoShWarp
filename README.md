@@ -26,7 +26,7 @@ Otherwise, for a manual installation:
 Motivation
 ----------
 
-Our systems contain projects strewn all over our systems.  We aim to keep things
+Our systems contain projects strewn all over the place.  We aim to keep things
 organised but something will always disrupt our careful organisation, and it
 becomes far to easy to forget where all these things end up living.  With
 PoShWarp, this problem becomes far more manageable because these commonly-used
@@ -257,7 +257,7 @@ The commands in the example given above would lead to the following warp-map:
 ```
 
 The format is largely self-explanatory and has been kept deliberately simple. 
-Warp-maps maybe be edited by hand and may include custom XML if you wish to use
+Warp-maps may be edited by hand and may include custom XML if you wish to use
 the file for multiple purposes.  There is no guarantee that the additional
 elements will be left undamaged, but PoShWarp commands have been designed to
 modify only the elements that are necessary.  Of course, there is a risk that a
